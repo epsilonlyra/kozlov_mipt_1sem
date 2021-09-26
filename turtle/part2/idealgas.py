@@ -1,6 +1,6 @@
 from random import randint
 import turtle  as tt
-
+tt.tracer(2,1)
 
 #  move some turtle by vector (deltax,deltay)
 def govector(deltax, deltay, turtle):  
@@ -30,7 +30,7 @@ for i in range(N):
     clon[i].shape('circle')
     clon[i].resizemode('user')
     clon[i].shapesize(0.3, 0.3)
-    clon[i].speed(3)
+    clon[i].speed(0)
 for i in range(N):
     clon[i].penup()
     clon[i].goto(randint(-250, 250), randint(-250, 250))
