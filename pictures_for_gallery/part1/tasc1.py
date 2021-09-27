@@ -6,16 +6,7 @@ pygame.init()
 FPS = 30
 screen = pygame.display.set_mode((500, 500))
 
-x1 = 100; y1 = 100
-x2 = 300; y2 = 200
-N = 10
-color = (100, 100, 100)
-rect(screen, color, (x1, y1, x2 - x1, y2 - y1), 2)
-h = (x2 - x1) // (N + 1)
-x = x1 + h
-for i in range(N):
-    line(screen, color, (x, y1), (x, y2))
-    x += h
+rect(screen, (200, 200 , 200), (0, 0, 500, 500)) #setting gray bacground
 
 pygame.display.update()
 clock = pygame.time.Clock()
