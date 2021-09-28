@@ -5,12 +5,12 @@ from pygame.draw import *
 pygame.init()
 
 '''
-creates a oriented black rectangle, given the coordinates of down right corner,
+creates a turned black rectangle, given the coordinates of down right corner,
 (alpha is beetween -90 and 90 degrees)
 
 '''
 
-def rectangleplus(screen, x,y, width, length, alpha):
+def rectangleplus(screen, x, y, width, length, alpha):
     cos = math.cos(alpha / 180 * math.pi)
     sin = math.sin(alpha / 180 * math.pi)
 
@@ -34,7 +34,7 @@ screen = pygame.display.set_mode((500, 500))
 
 rect(screen, (200, 200 , 200), (0, 0, 500, 500)) #  setting gray background
 
-circle(screen, (200, 200, 0), (250,250), 200) #  body
+circle(screen, (200, 200, 0), (250, 250), 200) #  body
 
 rect(screen, (0, 0, 0), (150, 350, 200, 20)) #  mouth
 
