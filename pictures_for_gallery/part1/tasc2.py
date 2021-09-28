@@ -1,3 +1,4 @@
+
 import math 
 import pygame
 from pygame.draw import *
@@ -25,7 +26,7 @@ rect(screen, GREY, (0, 0, 800, 500)) # draw sky
 circle(screen, WHITE, (700, 70), (60)) # draw moon
 
 '''
-bacground clouds
+  bacground clouds
 '''
 
 ellipse(screen, DARKESTGREY, (400, 250, 500, 70))
@@ -33,7 +34,7 @@ ellipse(screen, DARKGREY, (600, 125, 500, 70))
 ellipse(screen, DARKGREY, (300, 30, 400, 90))
 
 '''
-main part of the house   
+  main part of the house   
 '''
 
 rect(screen, OLIVEGREEN, (50, 200, 400, 600))
@@ -53,7 +54,7 @@ for i in range(0,10,1):
 rect(screen, DARKESTGREY, ((30 + (450 - 10) / 9), 380, (450 * 7 /  9 + 3) , 20))
 
 #  drawiing roof
-polygon(screen, BLACK, ((30, 200), (50, 180),(450, 180), (470, 200)))
+polygon(screen, BLACK, ((30, 200), (50, 180), (450, 180), (470, 200)))
 
 #  drawing pipes
 rect(screen, BLACK, (50, 160, 10, 20))
@@ -62,18 +63,28 @@ rect(screen, BLACK, (420, 100, 20, 80))
 
 
 '''
-close cloud
+  close cloud
 '''
 ellipse(screen, DARKERGREY, (0, 100, 400, 60))
 
 
 '''
-ghost
+  ghost
 '''
 
-he
+circle(screen,LIGHTGREY, (600,700), (30))
+
+#  eyes
+circle(screen, BLUE, (580, 700), (8))
+circle(screen, BLACK,(580, 700), (3))
+ellipse(screen, WHITE, (580, 700, 8, 1))
+
+circle(screen, BLUE, (620, 700), (8))
+circle(screen, BLACK,(620, 700), (3))
+ellipse(screen, WHITE, (620, 700, 8, 1))
 
 
+polygon(screen, LIGHTGREY, ((590, 695),(800, 900),(600, 900))) #body
 
 
 
@@ -107,6 +118,32 @@ finished = False
 
 while not finished:
     clock.tick(FPS)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             finished = True
