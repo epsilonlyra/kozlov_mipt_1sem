@@ -5,6 +5,7 @@ from pygame.draw import *
 pygame.init()
 
 '''
+
 creates a turned black rectangle, given the coordinates of down right corner,
 (alpha is beetween -90 and 90 degrees)
 
@@ -30,6 +31,7 @@ def rectangleplus(screen, x, y, width, length, alpha):
 
 
 FPS = 30
+
 screen = pygame.display.set_mode((500, 500))
 
 rect(screen, (200, 200 , 200), (0, 0, 500, 500)) #  setting gray background
@@ -51,11 +53,6 @@ circle(screen, (255, 69, 0), (350, 200), 30)
 circle(screen, (0, 0, 0), (350, 200), 10)
 
 rectangleplus(screen, 300, 200, 20, 150, -30)
-
-
-
-
-
 
 
 pygame.display.update()
