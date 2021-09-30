@@ -38,14 +38,17 @@ def littleghost(x ,y, orientation,):
     surf = pygame.Surface.copy(screen)
     body_surf = pygame.image.load('ghostbody.bmp')
     body_surf.set_colorkey((255, 255, 255))
+    body_surf = pygame.transform.scale(
+    body_surf,(body_surf.get_width() //2,
+               body_surf.get_height() //2))
     
     if orientation == 1:
         body_surf = pygame.transform.flip(
                 body_surf, True, False)
-        surf.blit(body_surf, (x - 125,y))
+        surf.blit(body_surf, (x - 190, y))
         
     elif orientation == 0:
-        surf.blit(body_surf, (x, y))
+        surf.blit(body_surf, (x-10, y))
 
     
     circle(surf, LIGHTGREY, (x,y), (15)) #  head
@@ -62,78 +65,83 @@ def littleghost(x ,y, orientation,):
     
     screen.blit(surf, (0,0))
 
-    
-def cloud( x,y,COLOR, visibility, width,length):
+'''
+
+draws a cloud(filled ellipse)
+x,y are the coordinates of left upper corner of coresponding rectangle
+visibilty can be 0 or 1
+0- transparent
+1-clear
+
+'''
+def cloud(x,y, COLOR, visibility, width,length):
 
     surf = pygame.Surface.copy(screen)
 
-    ellipse(surf, COLOR, (x,y, length, width))
+    ellipse(surf, COLOR, (x, y, length, width))
     
     if visibility == 0:
-        pygame.Surface.set_alpha(surf,100)
-        screen.blit(surf, (0,0))
+        pygame.Surface.set_alpha(surf, 20)
+        screen.blit(surf, (0, 0))
 
     elif visibility == 1:
-        screen.blit(surf, (0,0))
+        screen.blit(surf, (0, 0))
 
 '''
-  bacground clouds
-'''
 
-ellipse(screen, DARKESTGREY, (400, 250, 500, 70))
-ellipse(screen, DARKESTGREY, (400, 250, 500, 70))
-ellipse(screen, DARKGREY, (600, 125, 500, 70))
-ellipse(screen, DARKGREY, (300, 30, 400, 90))
+x,y - coordinates of upper left corner
 
 '''
-  main part of the house   
+def house(x, y):
+    surf = pygame.Surface.copy(screen)
+
+    rect(surf, OLIVEGREEN, (x, y, 200, 300)) #  body
+
+    for i in range(2): # down windows
+        rect(surf, DARKRED, ((x + 10 + 75 * i), y + 230, 25, 50))
+    rect(surf, YELLOW, ((x + 10 + 75 * (i+1)), y + 230, 25, 50))
+
+    for i in range(4): #  upper windows
+        rect(surf, TAN, ((x + 10 + 50 * i), y, 25, 125))
+
+    #  balcony
+    rect(surf, DARKESTGREY, (x - 20, y + 125, 40 + 200, 15))
+    for i in range(10): #  railing
+        rect(surf, DARKESTGREY,
+             ((x - 20 + (40 + 200 - 5) / 9 * i), y + 125 - 25 , 5, 25))
+    rect(surf, DARKESTGREY,
+         ((x - 20 + (40 + 200 - 5) / 9), y + 125 - 25, (40 + 200) * 7 / 9, 10))
+
+    # roof
+    polygon(surf, BLACK, ((x - 20, y), (x, y - 10),
+                          (x + 200, y-10), (x + 200 + 20, y)))
+
+    # pipes
+    rect(surf, DARKERGREY, (x, y - 20, 5, 10))
+    rect(surf, DARKERGREY, (x + 50 , y - 30, 5, 20))
+    rect(surf, DARKERGREY, (x + 190 , y- 45, 10, 40))
+        
+
+
+    screen.blit(surf, (0, 0))
+
+
+house(400,500)
+littleghost(250, 200, 0)
+
+
 '''
 
-rect(screen, OLIVEGREEN, (50, 200, 400, 600))
-
-# drawing windows
-for i in range(2):
-    rect(screen, DARKRED, (60 + 150 * i, 600, 50, 100))
-rect(screen, YELLOW, (60 + 150 * (i + 1), 600, 50, 100))
-
-for i in range(4):
-    rect(screen, TAN, (60 + 100 *i, 200, 50, 250))
-
-#  drawing balcony
-rect(screen, DARKESTGREY, (30,450,450,30))
-for i in range(0,10,1):
-    rect(screen, DARKESTGREY, ((30 + (450 - 10) / 9 * i), 400, 10, 50))
-rect(screen, DARKESTGREY, ((30 + (450 - 10) / 9), 380, (450 * 7 /  9 + 3) , 20))
-
-#  drawiing roof
-polygon(screen, BLACK, ((30, 200), (50, 180), (450, 180), (470, 200)))
-
-#  drawing pipes
-rect(screen, DARKERGREY, (50, 160, 10, 20))
-rect(screen, DARKERGREY, (150, 140, 20, 40))
-rect(screen, DARKERGREY, (420, 100, 20, 80))
-
-
-'''
-  close cloud
-'''
-ellipse(screen, DARKERGREY, (0, 100, 400, 60))
-
-
-    
-'''
    drawing big_ghost
+   
 '''
 
 body_surf = pygame.image.load('ghostbody.bmp')
 body_surf.set_colorkey((255, 255, 255))
-body_surf = pygame.transform.scale(
-    body_surf,(body_surf.get_width() * 2,
-               body_surf.get_height() * 2))
 
-screen.blit(body_surf, (600, 700))
+screen.blit(body_surf, (580, 700))
 
-circle(screen, LIGHTGREY, (600,700), (30))
+circle(screen, LIGHTGREY, (600, 700), (30))
 
 #  eyes
 circle(screen, BLUE, (580, 700), (8))
@@ -143,6 +151,10 @@ ellipse(screen, WHITE, (580, 700, 8, 1))
 circle(screen, BLUE, (620, 700), (8))
 circle(screen, BLACK,(620, 700), (3))
 ellipse(screen, WHITE, (620, 700, 8, 1))
+
+
+
+
 
 pygame.display.update()
 clock = pygame.time.Clock()
