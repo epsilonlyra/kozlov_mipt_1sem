@@ -74,6 +74,12 @@ ellipse(screen, DARKERGREY, (0, 100, 400, 60))
   ghost
 '''
 
+
+body_surf = pygame.image.load('ghostbody.bmp') # body
+body_surf.set_colorkey((255, 255, 255))
+
+screen.blit(body_surf, (580, 700))
+
 circle(screen,LIGHTGREY, (600,700), (30))
 
 #  eyes
@@ -86,7 +92,10 @@ circle(screen, BLACK,(620, 700), (3))
 ellipse(screen, WHITE, (620, 700, 8, 1))
 
 
-polygon(screen, LIGHTGREY, ((590, 695),(800, 900),(600, 900))) #  body
+
+
+
+
 
 
 pygame.display.update()
@@ -94,7 +103,7 @@ clock = pygame.time.Clock()
 finished = False
 
 while not finished:
-    clock.tick(FPS
+    clock.tick(FPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             finished = True
