@@ -129,24 +129,24 @@ now we begin actuall drawing
 '''
 
 #  drawing sky clouds
-cloud(0,150,BLACK, 50, 80, 500)
+cloud(0, 150,BLACK, 50, 80, 500)
 cloud(300, 100, DARKERGREY,255,60,700)
-cloud(350,20, DARKESTGREY,200, 40, 350)
+cloud(350, 20, DARKESTGREY, 200, 40, 350)
 
 #  drawing houses
-house(500,400)
-house(100,300)
+house(500, 400)
+house(100, 300)
 
 #  drawing ground clouds
-cloud(350,350, DARKESTGREY,100, 50, 350)
-cloud(150,500, DARKGREY,150, 100, 400)
+cloud(350, 350, DARKESTGREY, 100, 50, 350)
+cloud(150,500, DARKGREY, 150, 100, 400)
 
 #  drawing little_ghosts
 
-littleghost(200,600,1)
-littleghost(210, 680,0)
-littleghost(220, 800,1)
-littleghost(400,800,0)
+littleghost(200 ,600, 1)
+littleghost(210, 680, 0)
+littleghost(220, 800, 1)
+littleghost(400, 800, 0)
 
 
 
