@@ -119,8 +119,6 @@ x,y - coordinates of upper left corner
     rect(surf, DARKERGREY, (x + 50 , y - 30, 5, 20))
     rect(surf, DARKERGREY, (x + 190 , y- 45, 10, 40))
         
-
-
     screen.blit(surf, (0, 0))
 
 
@@ -137,7 +135,7 @@ cloud(300, 100, DARKERGREY,255,60,700)
 cloud(350, 20, DARKESTGREY, 200, 40, 350)
 
 #  drawing houses
-house(500, 400)
+house(0, 400)
 house(100, 300)
 
 #  drawing ground clouds
@@ -187,15 +185,18 @@ while not finished:
 
 pygame.quit()
 
-i = 0; #  documentation module
-while (i <= 2): # if user looks through 3 valid functions programm ends
+
+answer = input ("Want to Know More 'y/n':")
+
+while(answer == 'y'):
     f_call = input('Enter Function Name:') 
     if f_call in locals():
         print(locals()[f_call].__doc__)
-        i = i + 1
     else:
         print('Function', f_call, 'Does Not Exist, Please Try Again')
         print("Valid Functions:  {'cloud'  'littleghost'  'house'}")
+        
+    answer= input ("Anything Else? 'y/n':")
 
 
 
