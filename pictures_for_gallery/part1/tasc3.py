@@ -117,7 +117,7 @@ x,y - coordinates of upper left corner
     # pipes
     rect(surf, DARKERGREY, (x, y - 20, 5, 10))
     rect(surf, DARKERGREY, (x + 50 , y - 30, 5, 20))
-    rect(surf, DARKERGREY, (x + 190 , y- 45, 10, 40))
+    rect(surf, DARKERGREY, (x + 190 , y - 45, 10, 40))
         
     screen.blit(surf, (0, 0))
 
@@ -130,17 +130,17 @@ now we begin actuall drawing
 '''
 
 #  drawing sky clouds
-cloud(0, 150,BLACK, 50, 80, 500)
+cloud(0, 150, BLACK, 50, 80, 500)
 cloud(300, 100, DARKERGREY,255,60,700)
 cloud(350, 20, DARKESTGREY, 200, 40, 350)
 
 #  drawing houses
-house(0, 400)
+house(500, 400)
 house(100, 300)
 
 #  drawing ground clouds
 cloud(350, 350, DARKESTGREY, 100, 50, 350)
-cloud(150,500, DARKGREY, 150, 100, 400)
+cloud(150, 500, DARKGREY, 150, 100, 400)
 
 #  drawing little_ghosts
 
@@ -175,7 +175,7 @@ clock = pygame.time.Clock()
 finished = False
 
 print("Used Functions: {'cloud'  'littleghost'  'house'}")
-print("You can look through documentation after you close pygames window")
+print("You Can Look Through Documentation After You Close Pygames Window")
 
 while not finished:
     clock.tick(FPS)
@@ -186,9 +186,9 @@ while not finished:
 pygame.quit()
 
 
-answer = input ("Want to Know More 'y/n':")
+answer = input ("Want to Know More? 'y/n':")
 
-while(answer == 'y'):
+while(answer == 'y'): #  documentation module
     f_call = input('Enter Function Name:') 
     if f_call in locals():
         print(locals()[f_call].__doc__)
