@@ -24,17 +24,16 @@ rect(screen, GREY, (0, 0, 800, 500)) # draw sky
 circle(screen, WHITE, (700, 70), (60)) # draw moon
 
 
-'''
-
+def littleghost(x ,y, orientation,):
+    
+    '''
 draws a transperent little ghost
 x,y are the coorfinates of his head
 orientation is the way he looks(0 for left, 1 for right)
 his body is taken from a hand-drawn  bmp file
 
-'''
+    '''
 
-def littleghost(x ,y, orientation,):
-    
     surf = pygame.Surface.copy(screen)
     body_surf = pygame.image.load('ghostbody.bmp')
     body_surf.set_colorkey((255, 255, 255))
@@ -65,15 +64,17 @@ def littleghost(x ,y, orientation,):
     
     screen.blit(surf, (0,0))
 
-'''
+
+def cloud(x, y, COLOR, visibility, width,length):
+
+    '''
 
 draws a cloud(filled ellipse)
 x,y are the coordinates of left upper corner of coresponding rectangle
 visibilty is alpha parameter( from 0- to 255)
 
-'''
-def cloud(x,y, COLOR, visibility, width,length):
-
+    '''
+    
     surf = pygame.Surface.copy(screen)
 
     ellipse(surf, COLOR, (x, y, length, width))
@@ -82,12 +83,14 @@ def cloud(x,y, COLOR, visibility, width,length):
     screen.blit(surf, (0, 0))
 
 
-'''
+
+def house(x, y):
+
+    '''
 
 x,y - coordinates of upper left corner
 
-'''
-def house(x, y):
+    '''
     surf = pygame.Surface.copy(screen)
 
     rect(surf, OLIVEGREEN, (x, y, 200, 300)) #  body
@@ -149,13 +152,7 @@ littleghost(220, 800, 1)
 littleghost(400, 800, 0)
 
 
-
-
-
-
-
 # drawing big_ghost
-   
 
 body_surf = pygame.image.load('ghostbody.bmp')
 body_surf.set_colorkey((255, 255, 255))
@@ -175,11 +172,12 @@ ellipse(screen, WHITE, (620, 700, 8, 1))
 
 
 
-
-
 pygame.display.update()
 clock = pygame.time.Clock()
 finished = False
+
+print("Used Functions: {'cloud'  'littleghost'  'house'}")
+print("You can look through documentation after you close pygames window")
 
 while not finished:
     clock.tick(FPS)
@@ -188,4 +186,21 @@ while not finished:
             finished = True
 
 pygame.quit()
+
+i = 0; #  documentation module
+while (i <= 2): # if user looks through 3 valid functions programm ends
+    f_call = input('Enter Function Name:') 
+    if f_call in locals():
+        print(locals()[f_call].__doc__)
+        i = i + 1
+    else:
+        print('Function', f_call, 'Does Not Exist, Please Try Again')
+        print("Valid Functions:  {'cloud'  'littleghost'  'house'}")
+
+
+
+
+
+
+
 
