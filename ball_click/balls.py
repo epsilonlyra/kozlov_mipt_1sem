@@ -35,6 +35,58 @@ WHITE = (255, 255, 255)
 COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
 
+try:
+    BESTPLAYERS = open('BESTPLAYERS.txt', 'x')
+    BESTPLAYERS.close()
+    already_exists = False
+except:
+    already_exists = True
+
+BESTPLAYERS = open('BESTPLAYERS.txt', 'r')
+AllPlayers = BESTPLAYERS.readlines()
+BESTPLAYERS.close()
+
+Players=[]
+for player in AllPlayers:
+    Players.append(player.split())
+
+
+ScoreNames=[]    
+for player in Players:
+    player[2] = int(player[2])
+    ScoreNames.append([player[2], player[1]])
+    print(ScoreNames)
+
+
+print('What is Your Name, oh Great Hero?')
+
+if already_exists:
+    name_good = False
+else:
+    name_good = True
+    NAME = input('NAME:')
+
+while not name_good:
+    NAME = input('NAME:')
+                 
+    overlap_names = False
+    for scorename in ScoreNames:
+        if (NAME != scorename[1]):
+            continue
+        overlap_names = True
+
+    spaces_in_name = False
+    if len(NAME.split()) != 1:
+        spaces_in_name = True
+
+    if (not spaces_in_name) and (not overlap_names):
+        name_good = True
+    elif (spaces_in_name):
+        print("Do not Use Spaces in Name")
+    elif (overlap_names):
+        print("Name  already Taken")
+
+        
 class Ball():
      
     def __init__(self):
@@ -48,9 +100,9 @@ class Ball():
         self.v_y = randint(-self.speed, self.speed)
         
     def create(self):
-        '''
+        """
 draws a ball on screen
-        '''
+        """
         circle(screen, self.color, (self.x, self.y), self.r)
         
     def move_x(self):  
@@ -141,12 +193,24 @@ while not finished:
         
     img = font.render(SCORESIGN, True, WHITE)
     screen.blit(img, (20, 20))
-                                                             
-
-        
+                                                                  
     pygame.display.update()
+
     screen.fill(BLACK)
 
 pygame.quit()
 
 
+ScoreNames.append([SCORE, NAME])
+
+def custom_key(ScoreNames):
+    return(ScoreNames[0])
+
+ScoreNames.sort(reverse = True, key = custom_key)
+
+BESTPLAYERS = open('BESTPLAYERS.txt', 'w')
+
+for i in range (len(ScoreNames)):
+    print(i + 1, ScoreNames[i][1], ScoreNames[i][0], file  =  BESTPLAYERS)
+
+BESTPLAYERS.close()
