@@ -1,6 +1,6 @@
-import pygame
+import pygame 
 from pygame.draw import *
-import random
+import random as sus
 from random import randint
 
 def sign(x):
@@ -114,26 +114,26 @@ class Ball():
         
     def create(self):
         """
-draws a ball on screen
+	draws a ball on screen
         """
         circle(screen, self.color, (self.x, self.y), self.r)
         
     def move_x(self):  
         """
 movement in unit time in x direction
-        """
+		"""
         self.x = self.x + self.v_x
         
     def move_y(self):
         """
-movement in unit time in y dircetion
+	movement in unit time in y dircetion
         """
         self.y = self.y +  self.v_y
 
     def bounce_wall(self):
         """
-checking if the ball reaches border in the next time moment
-change velocity randomly, so it doesnt hit it
+	checking if the ball reaches border in the next time moment
+	change velocity randomly, so it doesnt hit it
         """
             #  checking if on the next step ball touches x-border
         if (self.x + self.v_x + self.r >= width) or \
@@ -157,15 +157,106 @@ change velocity randomly, so it doesnt hit it
             self.v_x = randint(-min(self.speed, self.x + self.r),
                                min(self.speed, width - self.r - self.x))
 
+    def check_click(self, mouse_coordinates):
+        if ((Mouse_coordinates[0] - self.x) **2 \
+            + (Mouse_coordinates[1] - self.y) **2) \
+                    <= (self.r) **2:
+            return(1)
+        else:
+            return(0)
+class Rect():
+     
+    def __init__(self):
+      
+        self.GEN_RATE = 1000 #  time in ms beetwen sqr generations
+        self.MAX_AMOUNT = 10  #  maximum amount of sqr on screen any time
+        self.x = randint(100, width - 100)
+        self.y = randint(100, height - 100)
+        self.a = randint(30, 50)
+        self.b = randint(30 ,50)
+        self.color = COLORS[randint(0, 5)]
+        self.speed = 5 # abs of movement in unit time in x or y direction
+        self.v_x = randint(-self.speed, self.speed)
+        self.v_y = randint(-self.speed, self.speed)
+        
+    def create(self):
+        """
+	draws a rect on screen
+        """
+        rect(screen, self.color, (self.x, self.y, self.a, self.b))
+        
+    def move_x(self):  
+        """
+	movement in unit time in x direction
+        """
+        self.x = self.x + self.v_x
+        
+    def move_y(self):
+        """
+	movement in unit time in y dircetion
+        """
+        self.y = self.y +  self.v_y
+
+    def bounce_wall(self):
+        """
+	checking if the ball reaches border in the next time moment
+	change velocity randomly, so it doesnt hit it
+        """
+            #  checking if on the next step ball touches x-border
+        if (self.x + self.v_x + self.a >= width) or \
+                (self.x  + self.v_x <= 0):     
+            k = randint(1, self.speed)  
+            self.v_x = -sign(self.v_x) * k  #  bounce away with x_speed!=0
+        
+            #  change v_y; if ball close to y-border change speed 
+            #  it will change less, not to hit y-border 
+            self.v_y = randint(-min(abs(self.speed), self.y),
+                               min(abs(self.speed), height - self.y - self.b))
+        
+            #  checking if on the next step ball touches y-border        
+        if (self.y + self.v_y >= height) or \
+                    (self.y - self.b + self.v_y <= 0):
+            k = randint(1, self.speed)
+            self.v_y = -sign(self.v_y) * k  #  bounce away with y_speed!=0
+
+            #  change v_x; if ball close to x-border 
+            #  it will change less, not to hit x-border
+            self.v_x = randint(-min(abs(self.speed), self.x),
+                               min(abs(self.speed), width - self.a - self.x))
+
+    def check_click(self, mouse_coordinates):
+        if (mouse_coordinates[0] - self.x >=0) and (mouse_coordinates[0] - self.x <= self.a) \
+         and (mouse_coordinates[1] - self.y >=0) and (mouse_coordinates[1] - self.y <= self.b):
+           return(1) 
+        else:
+            return(0)   
+
+
+
+def check_click(enemy, mouse_coordinates):
+	return(enemy.check_click(mouse_coordinates))
+	
+def create(enemy):
+    enemy.create()
+def bounce_wall(enemy):
+	enemy.bounce_wall()
+def move(enemy):
+	enemy.move_x()
+	enemy.move_y()
 
 SCORE = 0
 #  to give it to pyfont we use:
 SCORESIGN = bytes('Score:' + str(SCORE), encoding = 'utf-8')
 
-Balls = []
+ENEMIES = []
 GENERATE_BALL = pygame.USEREVENT + 0
 pygame.time.set_timer(GENERATE_BALL, Ball().GEN_RATE)
 
+GENERATE_RECT = pygame.USEREVENT + 1
+pygame.time.set_timer(GENERATE_RECT, Rect().GEN_RATE)
+
+img = font.render(SCORESIGN, True, WHITE)
+screen.blit(img, (20, 20))
 pygame.display.update()
 clock = pygame.time.Clock()
 
@@ -180,30 +271,30 @@ while not finished:
         if event.type == pygame.QUIT:
             finished = True
             
-        if event.type == GENERATE_BALL and len(Balls) != Ball().MAX_AMOUNT:
-            Balls.append(Ball())
+        if event.type == GENERATE_BALL and len(ENEMIES) != Ball().MAX_AMOUNT:
+            ENEMIES.append(Ball())
+            
+        if event.type == GENERATE_RECT and len(ENEMIES) != Rect().MAX_AMOUNT:
+            ENEMIES.append(Rect())
                                              
         if event.type == pygame.MOUSEBUTTONDOWN:
             #  check if mouse click is inside the ball
             Mouse_coordinates = (pygame.mouse.get_pos())  
-            for ball in Balls: 
-                if ((Mouse_coordinates[0] - ball.x) **2 \
-                      + (Mouse_coordinates[1] - ball.y) **2) \
-                    <= (ball.r) **2:
-                        Balls.remove(ball)
+            for enemy in ENEMIES: 
+                if (check_click(enemy, Mouse_coordinates)) == 1:
+                        ENEMIES.remove(enemy)
                         SCORE = SCORE + 1
                         SCORESIGN = bytes('Score:' + str(SCORE),
                                           encoding = 'utf-8')
                                                                             
-    for ball in Balls:
-        ball.bounce_wall()
+    for enemy in ENEMIES:
+        bounce_wall(enemy)
         
-    for ball in Balls:
-        ball.move_x()
-        ball.move_y()
+    for enemy in ENEMIES:
+        move(enemy)
         
-    for ball  in Balls:
-        ball.create()
+    for enemy  in ENEMIES:
+        create(enemy)
         
     img = font.render(SCORESIGN, True, WHITE)
     screen.blit(img, (20, 20))
