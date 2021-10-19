@@ -1,3 +1,4 @@
 1 Rostropovich 53 41s
 2 Babylen_Tatarsky 53 55s
 3 Ishtar_Borisovna 32 34s
+4 Vovchik_Maloy 30.5 69s
