@@ -85,6 +85,7 @@ font = pygame.font.SysFont(None, 24, False, True, None)
 ANON_surf = pygame.image.load('pictures/anon.bmp')  # background incognito
 ANON_surf = pygame.transform.scale(ANON_surf, (width, height))
 
+anon_surf = pygame.image.load('pictures/smallanon.bmp')  # enemy skin
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
@@ -177,8 +178,8 @@ class Rect():
         self.a = randint(60, 100)  # rect width
         self.b = randint(self.a + 10, 120)  # rect height
 
-        self.x = randint(100, width - 100)
-        self.y = randint(100, height - 120)
+        self.x = randint(110, width - 119)
+        self.y = randint(120, height - 120)
         self.v_x = randint(-self.speed, self.speed)
         self.v_y = randint(-self.speed, self.speed)
 
@@ -233,29 +234,38 @@ pygame.time.set_timer(GENERATE_RECT, Rect().GEN_RATE)
 
 class Susqr():
     """
-    Red Square, bounces from walls normally
+    Square, bounces from walls normally
     if mouse to close tries to run away
     if mouse and border are close teleports in the center
+    if mode = 0 is red, of mode = 1 is anon skin
     """
     def __init__(self):
 
-        self.GEN_RATE = 5000  # time in ms beetwen sqr generations
+        self.GEN_RATE = 3000  # time in ms beetwen sqr generations
         self.color = RED
         self.value = 2  # worth in points
         self.speed = 5  # abs of maxmovement in unit time in x or y direction
         self.b = randint(50, 100)  # square length
         self.mindist = 100  # from what dist. from center run away stars
+        self.mode = 0
 
         self.x = randint(100, width - 100)
         self.y = randint(100, height - 100)
         self.v_x = randint(-self.speed, self.speed)
         self.v_y = randint(-self.speed, self.speed)
 
+        self.anon_surf = pygame.transform.scale(anon_surf, (self.b, self.b))
+
     def create(self):
         """
         draws a square on screen
+        if mode = 0 color = red
+        if mode = 1 anon skin
         """
-        rect(screen, self.color, (self.x, self.y, self.b, self.b))
+        if self.mode == 0:
+            rect(screen, self.color, (self.x, self.y, self.b, self.b))
+        if self.mode == 1:
+            screen.blit(self.anon_surf, (self.x, self.y))
 
     def run_away(self, Mouse_coordinates):
         """
@@ -355,7 +365,7 @@ def run_away(enemy, Mouse_coordinates):
 SCORE = 0
 TIME = 0  # time from start of game
 ENEMIES = []  # array which holds things you can click on
-MAX_ENEMIES = 1000   # maximum amount of enemies on  the screen
+MAX_ENEMIES = 10   # maximum amount of enemies on  the screen
 
 
 pygame.display.update()
@@ -376,14 +386,17 @@ while not finished:
             if event.type == GENERATE_RECT:
                 ENEMIES.append(Rect())
             if event.type == GENERATE_SUSQR:
-                ENEMIES.append(Susqr())                
+                ENEMIES.append(Susqr())
+                if SCORE >= 10:  # changing mode, to use anon skin
+                    ENEMIES[-1].mode = 1
+
         if event.type == pygame.MOUSEBUTTONDOWN:
             #  check if  inside the enemy hitbox and get plus score
             for enemy in ENEMIES:
                 if check_click(enemy, Mouse_coordinates, SCORE) == 1:
                     ENEMIES.remove(enemy)
                     SCORE = SCORE + enemy.value
-                                                                  
+                                                              
     for enemy in ENEMIES:
         try:
             run_away(enemy, Mouse_coordinates)
