@@ -19,7 +19,7 @@ try:
     BESTPLAYERS = open('BESTPLAYERS.txt', 'x')
     BESTPLAYERS.close()
 except FileExistsError:
-    (None)
+    pass
 
 BESTPLAYERS = open('BESTPLAYERS.txt', 'r')
 #  list of strings: 'position, name, score, time'
@@ -34,7 +34,7 @@ for player in AllPlayers:
 # time and name are not activly used
 ScoreNames = []
 for player in Players:
-    player[2] = float(player[2])  # score to int
+    player[2] = float(player[2])  # score to float
     ScoreNames.append([player[2], player[1], player[3]])
 
 
@@ -45,6 +45,7 @@ print('Press "Enter" if You Dont Want to Have Your Score on Leaderbord')
 name_good = False
 while not name_good:
     NAME = input('NAME:')
+    NAME = str(NAME)
     if NAME == '':
         blank_name = True  # incognito mode activation
     else:
@@ -57,7 +58,9 @@ while not name_good:
             overlap_names = True
 
         spaces_in_name = False
-        if len(NAME.split()) != 1:
+        for letter in NAME.split(sep=' '):
+            if (letter != ''):
+                continue
             spaces_in_name = True
 
     if not blank_name:
@@ -66,7 +69,7 @@ while not name_good:
         elif (spaces_in_name):
             print("Do not Use Spaces in Name")
         elif (overlap_names):
-            print("Name  already Taken")
+            print("Name already Taken")
     else:
         name_good = True
         print('Aнонимность Инкогнито Неузнаваемая Личность')
@@ -146,7 +149,7 @@ class Ball():
             self.v_x = randint(-min(self.speed, self.x + self.r),
                                min(self.speed, width - self.r - self.x))
 
-    def check_click(self, Mouse_coordinates, SCORE):
+    def check_click(self, Mouse_coordinates):
         """
         checks if mouse in hitbox,
         1 if hit, 0 if not
@@ -214,9 +217,9 @@ class Rect():
             self.v_x = randint(-min(abs(self.speed), self.x),
                                min(abs(self.speed), width - self.a - self.x))
 
-    def check_click(self, mouse_coordinates, SCORE):
+    def check_click(self, mouse_coordinates):
         """
-        checks if mouse in hitbox, and if hit adds value to SCORE
+        checks if mouse in hitbox
         1 if hit, 0 if not
         """
         if (mouse_coordinates[0] - self.x >= 0) and \
@@ -244,7 +247,7 @@ class Susqr():
         self.GEN_RATE = 3000  # time in ms beetwen sqr generations
         self.color = RED
         self.value = 2  # worth in points
-        self.speed = 5  # abs of maxmovement in unit time in x or y direction
+        self.speed = 8  # abs of maxmovement in unit time in x or y direction
         self.b = randint(50, 100)  # square length
         self.mindist = 100  # from what dist. from center run away stars
         self.mode = 0
@@ -311,9 +314,9 @@ class Susqr():
            (self.y + self.v_y <= 0):
             self.v_y = -(self.v_y)  # bounce away with same speed
 
-    def check_click(self, mouse_coordinates, SCORE):
+    def check_click(self, mouse_coordinates):
         """
-        checks if mouse in hitbox, and if hit adds value to SCORE
+        checks if mouse in hitbox,
         1 if hit, 0 if not
         """
         if (mouse_coordinates[0] - self.x >= 0) and \
@@ -329,8 +332,8 @@ GENERATE_SUSQR = pygame.USEREVENT + 2
 pygame.time.set_timer(GENERATE_SUSQR, Susqr().GEN_RATE)
 
 
-def check_click(enemy, mouse_coordinates, SCORE):
-    return(enemy.check_click(mouse_coordinates, SCORE))
+def check_click(enemy, mouse_coordinates):
+    return(enemy.check_click(mouse_coordinates))
 
 
 def create(enemy):
@@ -347,15 +350,6 @@ def move(enemy):
     """
     enemy.x = enemy.x + enemy.v_x
     enemy.y = enemy.y + enemy.v_y
-
-
-#  unused feature
-'''def accelerate(enemy):
-    """
-changes v_x,v_y by v_x and v_y - change in velocity
-    """
-    enemy.v_x = enemy.v_x + enemy.g_x
-    enemy.v_y = enemy.v_y + enemy.g_y'''
 
 
 def run_away(enemy, Mouse_coordinates):
@@ -393,7 +387,7 @@ while not finished:
         if event.type == pygame.MOUSEBUTTONDOWN:
             #  check if  inside the enemy hitbox and get plus score
             for enemy in ENEMIES:
-                if check_click(enemy, Mouse_coordinates, SCORE) == 1:
+                if check_click(enemy, Mouse_coordinates) == 1:
                     ENEMIES.remove(enemy)
                     SCORE = SCORE + enemy.value
                                                               
@@ -401,8 +395,7 @@ while not finished:
         try:
             run_away(enemy, Mouse_coordinates)
         except AttributeError:
-            (None)
-        '''accelerate(enemy)'''  # unused feature
+            pass
         bounce_wall(enemy)
         move(enemy)
         create(enemy)
