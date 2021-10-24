@@ -45,7 +45,6 @@ print('Press "Enter" if You Dont Want to Have Your Score on Leaderbord')
 name_good = False
 while not name_good:
     NAME = input('NAME:')
-    NAME = str(NAME)
     if NAME == '':
         blank_name = True  # incognito mode activation
     else:
@@ -58,10 +57,13 @@ while not name_good:
             overlap_names = True
 
         spaces_in_name = False
-        for letter in NAME.split(sep=' '):
-            if (letter != ''):
-                continue
+        if len(NAME.split()) != 1:  # check if more than one part(sep=' ')
             spaces_in_name = True
+        else:
+            for letter in NAME.split(sep=' '): # check if  '' in that part
+                if (letter != ''):
+                    continue
+                spaces_in_name = True
 
     if not blank_name:
         if (not spaces_in_name) and (not overlap_names):
@@ -69,7 +71,7 @@ while not name_good:
         elif (spaces_in_name):
             print("Do not Use Spaces in Name")
         elif (overlap_names):
-            print("Name already Taken")
+            print("Name Already Taken")
     else:
         name_good = True
         print('Aнонимность Инкогнито Неузнаваемая Личность')
@@ -424,3 +426,5 @@ for i in range(len(ScoreNames)):
     print(i + 1, ScoreNames[i][1], ScoreNames[i][0], ScoreNames[i][2],
           file=BESTPLAYERS)
 BESTPLAYERS.close()
+
+print('Thanks for playing the game!')
