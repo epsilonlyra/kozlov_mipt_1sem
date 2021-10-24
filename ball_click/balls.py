@@ -31,7 +31,6 @@ for player in AllPlayers:
     Players.append(player.split())
 
 # list of lists [score, name, time]
-# time and name are not activly used
 ScoreNames = []
 for player in Players:
     player[2] = float(player[2])  # score to float
@@ -47,6 +46,9 @@ while not name_good:
     NAME = input('NAME:')
     if NAME == '':
         blank_name = True  # incognito mode activation
+        name_good = True
+        print('Aнонимность Инкогнито Неузнаваемая Личность')
+        print('Incognito mode activated\nYour Score Will Not be Saved')
     else:
         blank_name = False
 
@@ -60,23 +62,17 @@ while not name_good:
         if len(NAME.split()) != 1:  # check if more than one part(sep=' ')
             spaces_in_name = True
         else:
-            for letter in NAME.split(sep=' '): # check if  '' in that part
+            for letter in NAME.split(sep=' '):  # check if  ''  is in that part
                 if (letter != ''):
                     continue
                 spaces_in_name = True
 
-    if not blank_name:
         if (not spaces_in_name) and (not overlap_names):
             name_good = True
         elif (spaces_in_name):
             print("Do not Use Spaces in Name")
         elif (overlap_names):
             print("Name Already Taken")
-    else:
-        name_good = True
-        print('Aнонимность Инкогнито Неузнаваемая Личность')
-        print('Incognito mode activated\nYour Score Will Not be Saved')
-
 
 pygame.init()
 
