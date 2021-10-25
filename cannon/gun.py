@@ -22,6 +22,8 @@ HEIGHT = 600
 g_y = -1  # gravity
 
 
+
+
 def rectangleplus(screen, color, x, y, width, length, alpha):
     """
     draws a turned rectabhlr on screen
@@ -44,11 +46,15 @@ def rectangleplus(screen, color, x, y, width, length, alpha):
     
 
 
+def showscore(score, screen):
+    SCORESIGN = bytes('score: ' + str(score), encoding='utf-8')
+    img = font.render(SCORESIGN, True, BLACK)
+    screen.blit(img, (20, 20))
+
 
 
 class Basecircle:
-    
-        
+            
     def draw(self):
         pygame.draw.circle(
             self.screen,
@@ -56,25 +62,29 @@ class Basecircle:
             (int(self.x), int(self.y)),
             int(self.r)
             )
-    
+        
+    def destroy(self):
+        if self.live < 0:
+            OBJECTS.remove(object)
 
     
 class Ball(Basecircle):
 
-    global BALLS
+
     def __init__(self, screen: pygame.Surface):
         """
 
 
         """
+        self.type = 'missile'
         self.screen = screen
         self.x = gun.x
         self.y = gun.y
-        self.r = 10
+        self.r = rnd(10,100)
         self.vx = 0
         self.vy = 0
         self.color = choice(GAME_COLORS)
-        self.live = 150 # how long ball lives in frames
+        self.live = 10  # how long ball lies   on ground in frames
         
 
     def move(self):
@@ -94,10 +104,6 @@ class Ball(Basecircle):
                 self.live = self.live - 1
             self.y = HEIGHT - self.r
         
-    def destroy(self):
-        if self.live <= 0:
-            BALLS.remove(ball)
-
     def hittest(self, obj):
         """Функция проверяет сталкивалкивается ли данный обьект с целью, описываемой в обьекте obj.
 
@@ -106,7 +112,7 @@ class Ball(Basecircle):
         Returns:
             Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
         """
-        if ( self.x - obj.x) **  2 + (self.y -obj.y) ** 2 <= (self.r +obj.r) ** 2:
+        if ( self.x - obj.x) **  2 + (self.y - obj.y) **  2 <= (self.r + obj.r) ** 2:
             return(True)
         else:
             return False
@@ -139,15 +145,14 @@ class Gun:
         Начальные значения компонент скорости мяча vx и vy
         зависят от положения мыши.
         """
-        global BALLS, bullet
+        global bullet
         bullet += 1
         ball = Ball(self.screen)
-        ball.r += 20
         self.an = math.atan2((event.pos[1]-ball.y),
                              (event.pos[0]-ball.x))  # angle in radians
         ball.vx = self.f2_power * math.cos(self.an)
         ball.vy = - self.f2_power * math.sin(self.an)
-        BALLS.append(ball)
+        OBJECTS.append(ball)
         self.f2_on = 0
         self.f2_power = 10
 
@@ -178,50 +183,77 @@ class Gun:
 
 class Target(Basecircle):
     
-    global TARGETS
-
+    targets = 0
+    
     def __init__(self, screen):
-        
+
+        self.type= 'target'
         self.screen = screen
         self.points = 10
         self.live = 1
-        self.x = rnd(600, 780)
-        self.y = rnd(300, 550)
         self.r = rnd(30, 50)
         self.color = RED
+        self.worth = 1
 
+        self.x = rnd(self.r, WIDTH - self.r)
+        self.vx =rnd(1, 10)
+        self.y = rnd(self.r, HEIGHT - self.r)
+        self.vy =rnd(1, 10)
+        
 
     def create():
+        global targets
         target = Target(screen)
-        TARGETS.append(target)
+        OBJECTS.append(target)
+        targets += 1
 
-    def destroy(self):
-        if self.live <= 0:
-            TARGETS.remove(target)
-
+    def move(self):
+        """
+        """
+        
+        self.x += self.vx
+        self.y -= self.vy
+        if (self.x + self.r) >= WIDTH:
+            self.vx = -self.vx
+            self.x = WIDTH - self.r
+        if (self.x - self.r) <=0:
+            self.vx = -self.vx
+            self.x = self.r
+        if (self.y  + self.r) >= HEIGHT:
+            self.vy = - self.vy
+            self.y = HEIGHT - self.r
+        if (self.y  - self.r) <= 0:
+            self.vy = - self.vy
+            self.y =self.r
 
 pygame.init()
 
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 24)
 
-TARGETS=[]
-BALLS= []
+OBJECTS =[]
 bullet = 0
+targets = 0
 gun = Gun(screen)
-
+score = 0
+wait = 0
 finished = False
-Target.create()
 while not finished:
+    
     screen.fill(WHITE)
+    showscore(score, screen)
     gun.draw()
-    for target in TARGETS:
-        target.destroy()
-        target.draw()
-    for ball in BALLS:
-        ball.destroy()
-        ball.draw()
+    if targets <= 1:
+        wait +=1
+        if (wait>=150):
+            Target.create()
+            wait = 0
+            
+    for object in OBJECTS:
+        object.destroy()
+        object.draw()
     pygame.display.update()
 
     clock.tick(FPS)
@@ -235,11 +267,20 @@ while not finished:
         elif event.type == pygame.MOUSEMOTION:
             gun.targetting(event)
 
-    for ball in BALLS:
-        ball.move()
-        if ball.hittest(target):
-            target.live = 0
+    for object in OBJECTS:
+        object.move()
+    for obj1 in OBJECTS:
+        if obj1.type == 'missile':
+            for obj2 in OBJECTS:
+                if obj2.type == 'target' and obj1.hittest(obj2):
+                    obj2.live = -1
+                    targets -=1
+                    score += obj2.worth
+                    wait = 0
+                    bullets = 0
+                    
     gun.power_up()
-
+    
+    
 pygame.quit()
 
