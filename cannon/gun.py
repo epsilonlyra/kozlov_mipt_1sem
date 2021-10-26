@@ -52,6 +52,57 @@ def showscore(score, screen):
     screen.blit(img, (20, 20))
 
 
+def showkill(screen):
+
+
+    global wait_gun, bullet, show_time
+    if show_time:
+        BULLETSIGN = bytes('You managed to destroy target  using ' + str(bullet) + ' missiles', encoding='utf-8')
+        img = font.render(BULLETSIGN, True, BLACK)
+        screen.blit(img, (round(WIDTH /2), 100))
+        wait_gun += 1
+    if wait_gun >= max_wait_gun:
+        show_time = False
+        wait_gun = 0
+        bullet = 0
+        
+        
+
+
+
+OBJECTS =[]
+bullet = 0
+targets = 0
+max_targets = 2
+score = 0
+wait_target = 0
+max_wait_target = 60
+wait_gun = 0 
+max_wait_gun = 100
+show_time = False
+
+def calculateall():
+
+    global targets, score, show_time
+    for obj1 in OBJECTS:
+        if obj1.type == 'missile':
+            for obj2 in OBJECTS:
+                if obj2.type == 'target' and obj1.hittest(obj2):
+                    obj2.live = -1
+                    targets -=1
+                    score += obj2.worth
+                    OBJECTS.remove(obj1)
+                    show_time = True
+                    wait_gun= max_wait_gun
+def targetgen():
+    global targets, wait_target
+    if targets < max_targets :
+        wait_target +=1
+        if (wait_target >= max_wait_target):
+            target = Target(screen)
+            OBJECTS.append(target)
+            targets += 1
+            wait_target = 0
 
 class Basecircle:
             
@@ -80,7 +131,7 @@ class Ball(Basecircle):
         self.screen = screen
         self.x = gun.x
         self.y = gun.y
-        self.r = rnd(10,100)
+        self.r = rnd(10, 20)
         self.vx = 0
         self.vy = 0
         self.color = choice(GAME_COLORS)
@@ -98,7 +149,7 @@ class Ball(Basecircle):
             self.vx = -self.vx
         if (self.y  + self.r) >= HEIGHT:
             self.vy = - self.vy/2
-            if self.vy <= 2:  # magical number, used to stop bouncing
+            if self.vy <= 2 *  -g_y:  # magical number, used to stop bouncing
                 self.vy = 0
                 self.vx = 0
                 self.live = self.live - 1
@@ -200,13 +251,6 @@ class Target(Basecircle):
         self.y = rnd(self.r, HEIGHT - self.r)
         self.vy =rnd(1, 10)
         
-
-    def create():
-        global targets
-        target = Target(screen)
-        OBJECTS.append(target)
-        targets += 1
-
     def move(self):
         """
         """
@@ -233,51 +277,37 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 font = pygame.font.SysFont(None, 24)
 
-OBJECTS =[]
-bullet = 0
-targets = 0
 gun = Gun(screen)
-score = 0
-wait = 0
 finished = False
 while not finished:
     
     screen.fill(WHITE)
-    showscore(score, screen)
     gun.draw()
-    if targets <= 1:
-        wait +=1
-        if (wait>=150):
-            Target.create()
-            wait = 0
+    targetgen()
             
     for object in OBJECTS:
         object.destroy()
         object.draw()
+
+    showscore(score, screen)
+    showkill(screen)
     pygame.display.update()
 
     clock.tick(FPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             finished = True
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.MOUSEBUTTONDOWN and not show_time:
             gun.fire2_start(event)
-        elif event.type == pygame.MOUSEBUTTONUP:
+        elif event.type == pygame.MOUSEBUTTONUP and not show_time:
             gun.fire2_end(event)
         elif event.type == pygame.MOUSEMOTION:
             gun.targetting(event)
 
     for object in OBJECTS:
         object.move()
-    for obj1 in OBJECTS:
-        if obj1.type == 'missile':
-            for obj2 in OBJECTS:
-                if obj2.type == 'target' and obj1.hittest(obj2):
-                    obj2.live = -1
-                    targets -=1
-                    score += obj2.worth
-                    wait = 0
-                    bullets = 0
+    calculateall()
+    
                     
     gun.power_up()
     
