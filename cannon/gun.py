@@ -3,7 +3,7 @@ import math
 from random import choice
 from random import randint as rnd
 
-FPS = 30
+FPS = 30  # all in game time intervals depend on fps(more fps - faster game)
 
 RED = 0xFF0000
 BLUE = 0x0000FF
@@ -14,7 +14,7 @@ CYAN = 0x00FFCC
 BLACK = 0x000000
 WHITE = 0xFFFFFF
 GREY = 0x7D7D7D
-GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
+GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]  # colors for targets
 
 # screen param(pixels)
 WIDTH = 800
@@ -24,12 +24,14 @@ HEIGHT = 600
 OBJECTS = []
 
 
-def iszero(x):
+def signum(x):
     """
-    if x = 0 return 0, else return 1
+    if x = 0 return 0, if positive return 1, if negative -1
     """
     if x == 0:
         return(0)
+    elif x < 0:
+        return(-1)
     else:
         return(1)
 
@@ -53,7 +55,6 @@ def rectangleplus(screen, color, x, y, width, length, alpha):
 
     x4 = x3 - length * cos
     y4 = y3 - length * sin
-
     pygame.draw.polygon(screen, color, ((x1, y1), (x2, y2),
                                         (x3, y3), (x4, y4)))
 
@@ -118,26 +119,33 @@ def updatesigns():
     Used for updating text for examples of Sign
     """
 
-    global INFO, SCORE, HEALTH
-    # iszero function is used to determine if we use plural form or not
+    global INFO, SCORE, HEALTH, AMMO, player
+    # signum function is used to determine if we use plural form or not
     INFO.text = ('You managed to destroy ' +
                  str(INFO.d_enemies) +
-                 ' foe' + 's' * iszero(INFO.d_enemies - 1) +
+                 ' foe' + 's' * signum(INFO.d_enemies - 1) +
                  ' using ' + str(INFO.used_bullets) +
-                 ' missile' + 's' * iszero(INFO.used_bullets - 1))
+                 ' missile' + 's' * signum(INFO.used_bullets - 1))
     SCORE.text = 'score: ' + str(SCORE.score)
-    HEALTH.text = 'Health: ' + str(player.live)
+    HEALTH.text = 'health: ' + str(player.live)  # player health
+    # if player uses standart missiles says standart
+    if not player.changed:
+        AMMO.text = 'ammunition:  standart'
+    else:
+        AMMO.text = 'ammunition:  sus'
 
 
 def calculateall():
     """
     checks for collisions of ingame objects with missiles
     get plus score, get minus health for objects
+    change INFO
     """
-    global OBJECTS, SCORE, INFO
+    global OBJECTS, SCORE, INFO, GEN
     for obj1 in OBJECTS:
         if obj1.type == 'missile':
             for obj2 in OBJECTS:
+                # missile doesnt collide with self and intersects its target
                 if not (obj1 == obj2) and obj1.hittest(obj2):
                     obj1.live -= 1  # minus health for missile
                     obj2.live -= 1  # get minus health for obj2
@@ -145,7 +153,7 @@ def calculateall():
                         # if obj2 not (missile or player) will pass:
                         try:
                             SCORE.score += obj2.worth
-                            GEN.enemies -= 1
+                            GEN.enemies -= 1  # enemies om screen
                             INFO.d_enemies += 1  # destroy enemy
                             # Bullets used for that destruction equal to /
                             # released bullets
@@ -158,7 +166,7 @@ def calculateall():
 
 class EnemyGener:
     """
-    generates enemies in time intervals
+    generates enemies in fixed  time interval if not to many are present
     """
     def __init__(self):
         self.max = 3  # maximum amount of enemies on screen
@@ -177,7 +185,8 @@ class EnemyGener:
                 if rnd(1, 5) == 1:  # will spawn in 20 % cases
                     target = EnemyGun(screen)
                 else:
-                    target = Target(screen)
+                    target = choice([Target(screen),
+                                     AccTar(screen), NinjaTar(screen)])
                 OBJECTS.append(target)
                 self.enemies += 1
                 self.timer1.restart()
@@ -185,7 +194,7 @@ class EnemyGener:
 
 class Basecircle:
     """
-    Base class for inggame objects
+    Base class for  all inggame objects
     """
 
     def __init__(self, screen):
@@ -225,6 +234,7 @@ class Basecircle:
 class Missile(Basecircle):
     """
     Base class for all Missiles
+    Works on compos with Gun
     """
     def __init__(self, screen, gun, r):
         """
@@ -273,6 +283,7 @@ class Missile(Basecircle):
 class Ball(Missile):
     """
     Standart missile for player
+    Has gravity
     """
 
     def __init__(self, screen, gun):
@@ -284,7 +295,7 @@ class Ball(Missile):
         self.r = r
         self.g_y = -1  # gravity
         self.color = choice(GAME_COLORS)
-        self.timer0 = Timer()
+        self.timer0 = Timer()  # controls time ball spends on down border
         self.maxtime = 30  # maximun time to spend on  ground
 
     def move(self):
@@ -316,7 +327,7 @@ class AnonBall(Missile):
         """
         gun is example of Gun
         """
-        r = 20  # hitbox radius
+        r = rnd(20, 30)  # hitbox radius
         super().__init__(screen, gun, r)
         self.r = r
         self.anon_surf = pygame.transform.scale(
@@ -347,16 +358,18 @@ class SusBall(Missile):
             pygame.image.load('pictures/sus.jpg'),
             (2 * self.r, 2 * self.r))
         self.timer0 = Timer()
-        self.sus_speed = 10  # speed when acting sus
+        self.sus_speed = 15  # speed when acting sus
 
     def choose(self):
         """
         If choosed sus_target is not ok : it is missile or doesnt exist
         chooses again from OBJECTS, stops when chosen target is ok
         """
-        while (OBJECTS.count(self.sus_target) == 0 or
-               (self.sus_target.type == 'missile')):
-            self.sus_target = choice(OBJECTS)
+        # while the game is going on( so not to end up in inf cycle)
+        if player in OBJECTS:
+            while (OBJECTS.count(self.sus_target) == 0 or
+                   (self.sus_target.type == 'missile')):
+                self.sus_target = choice(OBJECTS)
 
     def calcspeed(self):
         """
@@ -530,13 +543,16 @@ class PlayerTank(Gun):
         updates INFo bullets, fires
         """
         global INFO
-        if not self.changed:
-            type = Ball(screen, self)
-        else:
-            type = SusBall(screen, self)
-        if self.f2_on == 1:
-            INFO.bullets += 1
-        super().fire2_end(event.pos[0], event.pos[1], type)
+        try:  # if user tries to fire after end game will not break program
+            if not self.changed:
+                type = Ball(screen, self)
+            else:
+                type = SusBall(screen, self)
+            if self.f2_on == 1:
+                INFO.bullets += 1
+            super().fire2_end(event.pos[0], event.pos[1], type)
+        except IndexError:  # no possible objects
+            pass
 
     def changeammo(self):
         """
@@ -603,14 +619,14 @@ class PlayerTank(Gun):
         gets back on the other side
         """
         global HEIGHT, WIDTH
-        if self.x >= WIDTH:
-            self.x = 1
-        if self.x <= 0:
+        if self.x > WIDTH:
+            self.x = 0
+        if self.x < 0:
             self.x = WIDTH
 
-        if self.y >= HEIGHT:
-            self.y = 1
-        if self.y <= 0:
+        if self.y > HEIGHT:
+            self.y = 0
+        if self.y < 0:
             self.y = HEIGHT
         PlayerTank.calcspeed(self)
 
@@ -618,6 +634,10 @@ class PlayerTank(Gun):
 
 
 class Target(Basecircle):
+    """
+    Red target, bounses from walls withougth gravity
+    Parent class for other targets
+    """
     def __init__(self, screen):
         self.type = 'target'
         self.screen = screen
@@ -628,13 +648,14 @@ class Target(Basecircle):
 
         # random velosity(positive) and position
         self.x = rnd(self.r, WIDTH - self.r)
-        self.vx = rnd(1, 10)
+        self.vx = choice([-1, 1]) * rnd(1, 10)
         self.y = rnd(self.r, HEIGHT - self.r)
-        self.vy = rnd(1, 10)
+        self.vy = choice([-1, 1]) * rnd(1, 10)
 
     def move(self):
         """
         if touches border reverse velocity
+        and coordinates equal to border
         """
         super().move()
         if (self.x + self.r) >= WIDTH:
@@ -649,6 +670,92 @@ class Target(Basecircle):
         if (self.y - self.r) <= 0:
             self.vy = -self.vy
             self.y = self.r
+
+
+class AccTar(Target):
+    """
+    Magenta colored, changes acceleration randomly each time interval
+    """
+    def __init__(self, screen):
+        super().__init__(screen)
+        self.timer = Timer()
+        self.wait = 30
+        self.g_y = 0
+        self.g_x = 0
+        self.color = MAGENTA
+
+    def calcspeed(self):
+        self.timer.tick()
+        if self.timer.ready(self.wait):
+            self.g_x = rnd(-1, 1)
+            self.g_y = rnd(-1, 1)
+            self.timer.restart()
+        self.vx += self.g_x
+        self.vy += self.g_y
+        # if speed to high dont change it more
+        if abs((self.vx)) >= 20:
+            self.vx = signum(self.vx) * 20
+        if abs((self.vy)) >= 20:
+            self.vy = signum(self.vy) * 20
+
+    def move(self):
+        AccTar.calcspeed(self)
+        super().move()
+
+
+class NinjaTar(Target):
+    """
+    If too close to player or missile changes velosity in position randomly
+    needs some time to recover after jump
+    """
+    def __init__(self, screen):
+        super().__init__(screen)
+        self.r = rnd(5, 10)
+        self.timer = Timer()
+        self.maxtime = 30  # time to recover
+        self.worth = 3
+
+    def isclose(self):
+        """
+        check if any missiles or player are near
+        """
+        smnclose = False
+        for object in OBJECTS:
+            # square of distance with object
+            sqrdist = (object.x - self.x) ** 2 + (object.y - self.y) ** 2
+            if (object.type == 'missile' or object.type == 'player'):
+                # if closer than some distanse
+                if sqrdist < (3 * (self.r + object.r)) ** 2:
+                    smnclose = True
+                    break  # if found one returns no need to go futher
+        return(smnclose)
+
+    def jump(self):
+        """
+        change position and speed randomly if target close and ninja recovered
+        from previous jump
+        """
+        if self.timer.ready(self.maxtime) and NinjaTar.isclose(self):
+            # moves up, down, left, right randomly
+            self.x += 10 * choice([1, -1]) * self.r
+            self.y += 10 * choice([1, -1]) * self.r
+            self.vx = choice([-1, 1]) * rnd(1, 10)
+            self.vy = choice([-1, 1]) * rnd(1, 10)
+            self.timer.restart()
+        # if after jump got out of border, put inside
+        if self.x <= self.r:
+            self.x = self.r
+        if self.x >= WIDTH - self.r:
+            self.x = WIDTH - self.r
+        if self.y <= self.r:
+            self.y = self.r
+        if self.y >= HEIGHT - self.r:
+            self.y = HEIGHT - self.r
+
+    def move(self):
+        self.timer.tick()
+        NinjaTar.jump(self)
+        super().move()
 
 
 pygame.init()
@@ -676,28 +783,39 @@ SCORE.score = 0
 
 HEALTH = Sign(screen)
 HEALTH.health = 0  # player health
-HEALTH.x = WIDTH - 100  # for indent
+HEALTH.x = WIDTH - 200  # for indent
+
+# shows what kind of missiles player uses
+AMMO = Sign(screen)
+AMMO.x = WIDTH - 200
+AMMO.y = 40
+
 
 # sign which is shown at the end of game
 END = Sign(screen)
-END.maxtime = 200
+END.maxtime = 100
 END.text = 'GAME OVER!'
 END.x = round(WIDTH / 2) - 40
 END.y = round(HEIGHT / 2)
 
-SIGNS = [SCORE, HEALTH, INFO]  # signs can bee seen than game goes on
+SIGNS = [SCORE, HEALTH, INFO, AMMO]  # signs can bee seen than game goes on
 
 GEN = EnemyGener()
 
 # used for game-testing
 '''
+sus = NinjaTar(screen)
+OBJECTS.append(sus)
+'''
+'''
 ai = EnemyGun(screen)
 bebrovoz228 = EnemyGun(screen)
-bebrovoz228.fire_speed = 5
+bebrovoz228.fire_speed = 50
 OBJECTS.append(bebrovoz228)
 ai.fire_speed = 50
 OBJECTS.append(ai)
 '''
+
 player = PlayerTank(screen)
 OBJECTS.append(player)
 
@@ -724,7 +842,6 @@ while not finished:
         if END.timer2.ready(END.maxtime):
             finished = True
     pygame.display.update()
-
     clock.tick(FPS)
     for event in pygame.event.get():  # looking for event
         if event.type == pygame.QUIT:
@@ -735,12 +852,12 @@ while not finished:
             player.fire2_end()
         elif event.type == pygame.MOUSEMOTION:
             player.targetting()
-        elif event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN:
             player.changeammo()
             player.start()
-        elif event.type == pygame.KEYUP:
+        if event.type == pygame.KEYUP:
             player.stop()
-       
+
     GEN.spawn()
     updatesigns()
     calculateall()
