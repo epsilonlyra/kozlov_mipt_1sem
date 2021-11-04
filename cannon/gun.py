@@ -14,7 +14,7 @@ CYAN = 0x00FFCC
 BLACK = 0x000000
 WHITE = 0xFFFFFF
 GREY = 0x7D7D7D
-GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]  # colors for targets
+GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]  # colors for Targets
 
 # screen param(pixels)
 WIDTH = 800
@@ -523,6 +523,7 @@ class PlayerTank(Gun):
         self.y = rnd(self.r, HEIGHT)
         self.type = 'player'
         self.fire_speed = 10
+        self.timer3.time = self.fire_speed  # player can fire when game starts
         self.speed = 10  # speed for horizonatal-vertical movement
         # are W, A, S, D on key_board pressed down
         self.W, self.A, self.S, self. D = False, False, False, False
@@ -559,12 +560,16 @@ class PlayerTank(Gun):
         event is keyboard button down
         if player pushes r changes missile type
         if player pushes r afain changes is back
+        if missile is alternative fire speed is reduced
         """
+        global player
         if event.key == pygame.K_r:
             if not self.changed:
                 self.changed = True
+                player.fire_speed = 30
             else:
                 self.changed = False
+                player.fire_speed = 10  # back to normal
 
     def start(self):
         """
@@ -679,7 +684,7 @@ class AccTar(Target):
     def __init__(self, screen):
         super().__init__(screen)
         self.timer = Timer()
-        self.wait = 30
+        self.wait = 10
         self.g_y = 0
         self.g_x = 0
         self.color = MAGENTA
