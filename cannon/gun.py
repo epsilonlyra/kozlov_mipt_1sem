@@ -353,12 +353,12 @@ class SusBall(Missile):
         self.r = r
         self.color = choice(GAME_COLORS)
         self.sus_target = choice(OBJECTS)  # object which it follows
-        self.sus_mode = 15  # time in frames from fire to acting sus
+        self.sus_mode = 8  # time in frames from fire to acting sus
         self.sus_surf = pygame.transform.scale(
-            pygame.image.load('pictures/sus.jpg'),
+            pygame.image.load('pictures/sus.bmp'),
             (2 * self.r, 2 * self.r))
         self.timer0 = Timer()
-        self.sus_speed = 15  # speed when acting sus
+        self.sus_speed = 10  # speed when acting sus
 
     def choose(self):
         """
@@ -397,9 +397,33 @@ class SusBall(Missile):
         super().draw()
         if (self.timer0.ready(self.sus_mode) and
                 (self.sus_target == player)):
+            SusBall.checkmusic()
             self.sus_surf.set_colorkey((255, 255, 255))
             screen.blit(self.sus_surf, (self.x - self.r, self.y - self.r))
         self.timer0.tick()  # add  1 frame to time
+
+    def checkmusic():
+        """
+        Static method, regulates begging and stop of sus music
+        which is declared globally with pygame.music
+        If there are any SusBall that act sus(fly towards player)
+        will play. If no such  exist will stop.
+        """
+        global OBJECTS, player
+        stop = True  # do we start to fadeout music
+        for object in OBJECTS:
+            if str(object.__class__) == "<class '__main__.SusBall'>":
+                # if susbal in sus_mode
+                if object.timer0.ready(object.sus_mode):
+                    stop = False
+                    # if it doesnt currently play renew
+                    if not pygame.mixer.music.get_busy():
+                        pygame.mixer.music.play(start=3.8)
+
+        if player.live <= 0:  # if ending screen will fadeout
+            stop = True
+        if stop:
+            pygame.mixer.music.fadeout(2000)  # start 1 sec fadeout
 
 
 class Gun(Basecircle):
@@ -764,11 +788,13 @@ class NinjaTar(Target):
 
 
 pygame.init()
+pygame.mixer.init()
 
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))  # pygame screen
 clock = pygame.time.Clock()
 font = pygame.font.SysFont(None, 24)  # font for all  examples of Sign
+pygame.mixer.music.load('music/sus.ogg')  # loading music for missiles
 
 # Initializing signs, texts are managed by updatesign function
 
@@ -863,12 +889,13 @@ while not finished:
         if event.type == pygame.KEYUP:
             player.stop()
 
+    SusBall.checkmusic()
     GEN.spawn()
     updatesigns()
     calculateall()
     for object in OBJECTS:
         if object.type == 'player' or object.type == 'enemygun':
             object.power_up()
-
+pygame.mixer.quit()
 pygame.quit()
 print('Game Over!')
