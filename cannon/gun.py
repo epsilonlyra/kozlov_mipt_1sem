@@ -357,8 +357,9 @@ class SusBall(Missile):
         self.sus_surf = pygame.transform.scale(
             pygame.image.load('pictures/sus.bmp'),
             (2 * self.r, 2 * self.r))
+        self.sus_surf.set_colorkey(WHITE)  # make background invisible
         self.timer0 = Timer()
-        self.sus_speed = 10  # speed when acting sus
+        self.sus_speed = 15  # speed when acting sus
 
     def choose(self):
         """
@@ -397,8 +398,6 @@ class SusBall(Missile):
         super().draw()
         if (self.timer0.ready(self.sus_mode) and
                 (self.sus_target == player)):
-            SusBall.checkmusic()
-            self.sus_surf.set_colorkey((255, 255, 255))
             screen.blit(self.sus_surf, (self.x - self.r, self.y - self.r))
         self.timer0.tick()  # add  1 frame to time
 
@@ -413,8 +412,9 @@ class SusBall(Missile):
         stop = True  # do we start to fadeout music
         for object in OBJECTS:
             if str(object.__class__) == "<class '__main__.SusBall'>":
-                # if susbal in sus_mode
-                if object.timer0.ready(object.sus_mode):
+                # if susbal in sus_mode and follows player
+                if object.timer0.ready(object.sus_mode) and \
+                        object.sus_target == player:
                     stop = False
                     # if it doesnt currently play renew
                     if not pygame.mixer.music.get_busy():
@@ -423,7 +423,7 @@ class SusBall(Missile):
         if player.live <= 0:  # if ending screen will fadeout
             stop = True
         if stop:
-            pygame.mixer.music.fadeout(2000)  # start 1 sec fadeout
+            pygame.mixer.music.fadeout(1000)  # start 1 sec fadeout
 
 
 class Gun(Basecircle):
